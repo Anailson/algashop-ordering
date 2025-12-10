@@ -1,6 +1,7 @@
 package com.algaworks.algashop.ordering;
 
 import com.algaworks.algashop.domain.entity.Customer;
+import com.algaworks.algashop.domain.utility.IdGenerator;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -12,19 +13,17 @@ public class CustomerTest {
     @Test
     public void testingCustomer() {
         Customer customer = new Customer(
-                UUID.randomUUID(),
-                "Teste",
-                LocalDate.of(1991, 7, 5),
-                "teste@gmail.com",
-                "255-456-4512",
-                "255-08-1547",
+                IdGenerator.generateTimeBasedUUID(),
+                "Jhon Doe",
+                LocalDate.of(1991, 7,5),
+                "jhon.doe@email.com",
+                "478-256-2504",
+                "255-08-0578",
                 true,
                 OffsetDateTime.now()
-
         );
 
         customer.addLoayltyPoints(10);
-
     }
 
 }
