@@ -59,8 +59,17 @@ public class Customer {
 
     }
 
+    /*
+    Metodo de arquivar dados
+     */
     public void archive() {
-
+        this.setArchived(true);
+        this.setArchivedAt(OffsetDateTime.now());
+        this.setFullName("Anonymous");
+        this.setPhone("000-000-0000");
+        this.setDocument("000-00-0000");
+        this.setEmail(UUID.randomUUID() + "@anonymous.com");
+        this.setBirthDate(null);
     }
 
     public void enablePromotionNotifications() {
@@ -134,7 +143,7 @@ public class Customer {
 
     private void setFullName(String fullName) {
         Objects.requireNonNull(fullName, VALIDATION_ERROR_FULLNAME_IS_NULL);
-        if(fullName.isBlank()) {
+        if (fullName.isBlank()) {
             throw new IllegalArgumentException(VALIDATION_ERROR_FULLNAME_IS_BLANK);
         }
         this.fullName = fullName;
