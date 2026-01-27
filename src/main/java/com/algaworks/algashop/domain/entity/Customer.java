@@ -2,6 +2,7 @@ package com.algaworks.algashop.domain.entity;
 
 import com.algaworks.algashop.domain.exception.CustomerArchivedException;
 import com.algaworks.algashop.domain.valueobject.*;
+import lombok.Builder;
 
 import java.time.OffsetDateTime;
 import java.util.Objects;
@@ -25,9 +26,10 @@ public class Customer {
     private Address address;
 
     //criando novo cliente
-    public static Customer brandNew(FullName fullName, BirthDate birthDate, Email email,
-                                    Phone phone, Document document, Boolean promotionNotificationsAllowed,
-                                    Address address) {
+    @Builder(builderClassName = "BrandNewCostumerBuild", builderMethodName = "brandNew")
+    private static Customer createBrandNew(FullName fullName, BirthDate birthDate, Email email,
+                                           Phone phone, Document document, Boolean promotionNotificationsAllowed,
+                                           Address address) {
         return new Customer(new CustomerId(),
                 fullName,
                 birthDate,
@@ -43,27 +45,7 @@ public class Customer {
     }
 
     //criar cliente existente
-    public static Customer existing(CustomerId id, FullName fullName, BirthDate birthDate, Email email, Phone phone,
-                                    Document document, Boolean promotionNotificationsAllowed, Boolean archived,
-                                    OffsetDateTime registeredAt, OffsetDateTime archivedAt,
-                                    LoyaltyPoints loyaltyPoints, Address address) {
-        return new Customer(
-                id,
-                fullName,
-                birthDate,
-                email,
-                phone,
-                document,
-                promotionNotificationsAllowed,
-                archived,
-                registeredAt,
-                archivedAt,
-                loyaltyPoints,
-                address
-        );
-
-    }
-
+    @Builder(builderClassName = "ExistingCustomerBuild", builderMethodName = "existing")
     public Customer(CustomerId id, FullName fullName, BirthDate birthDate, Email email, Phone phone,
                     Document document, Boolean promotionNotificationsAllowed, Boolean archived,
                     OffsetDateTime registeredAt, OffsetDateTime archivedAt, LoyaltyPoints loyaltyPoints, Address address) {
