@@ -126,6 +126,11 @@ public class Order {
 
     }
 
+    public void markAsPaid() {
+         this.setPaidAt(OffsetDateTime.now());
+         this.changeStatus(OrderStatus.PAID);
+    }
+
     public void changePaymentMethod(PaymentMethod paymentMethod) {
         Objects.requireNonNull(paymentMethod);
         this.setPaymentMethod(paymentMethod);
@@ -161,6 +166,9 @@ public class Order {
         return OrderStatus.PLACED.equals(this.status());
     }
 
+    public boolean isPaid(){
+        return OrderStatus.PAID.equals(this.status());
+    }
 
     public OrderId id() {
         return id;
@@ -329,4 +337,6 @@ public class Order {
     public int hashCode() {
         return Objects.hashCode(id);
     }
+
+
 }
