@@ -1,5 +1,6 @@
 package com.algaworks.algashop.domain.entity;
 
+import com.algaworks.algashop.domain.exception.OrderStatusCannotBeChangedException;
 import com.algaworks.algashop.domain.valueobject.*;
 import com.algaworks.algashop.domain.valueobject.id.CustomerId;
 import com.algaworks.algashop.domain.valueobject.id.OrderId;
@@ -105,6 +106,27 @@ public class Order {
         this.recalculateTotals();
     }
 
+    public void place() {
+        //TODO Business rules! - regra de negocios pendentes
+        this.changeStatus(OrderStatus.PLACED);
+    }
+
+    private void changeStatus(OrderStatus newStatus) {
+        Objects.requireNonNull(newStatus);
+        if (this.status().canNotChangeTo(newStatus)) {
+            throw new OrderStatusCannotBeChangedException(this.id(), this.status(), newStatus);
+        }
+        this.setStatus(newStatus);
+    }
+
+    public boolean isDraft() {
+        return OrderStatus.DRAFT.equals(this.status());
+    }
+
+    public boolean isPlaced() {
+        return OrderStatus.PLACED.equals(this.status());
+    }
+
 
     public OrderId id() {
         return id;
@@ -175,9 +197,9 @@ public class Order {
                 .reduce(0, Integer::sum);
 
         BigDecimal shippingCost;
-        if(this.shippingCost() == null){
+        if (this.shippingCost() == null) {
             shippingCost = BigDecimal.ZERO;
-        }else{
+        } else {
             shippingCost = this.shippingCost.value();
         }
 
