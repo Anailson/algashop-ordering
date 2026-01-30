@@ -1,5 +1,6 @@
 package com.algaworks.algashop.domain.entity;
 
+import com.algaworks.algashop.domain.exception.OrderCannotBePlacedException;
 import com.algaworks.algashop.domain.exception.OrderInvalidShippingDeliveryDateException;
 import com.algaworks.algashop.domain.exception.OrderStatusCannotBeChangedException;
 import com.algaworks.algashop.domain.valueobject.*;
@@ -109,7 +110,20 @@ public class Order {
 
     public void place() {
         //TODO Business rules! - regra de negocios pendentes
+        Objects.requireNonNull(this.shipping());
+        Objects.requireNonNull(this.billing());
+        Objects.requireNonNull(this.expectedDeliveryDate());
+        Objects.requireNonNull(this.shippingCost());
+        Objects.requireNonNull(this.paymentMethod());
+        Objects.requireNonNull(this.items());
+
+        if (this.items().isEmpty()) {
+            throw new OrderCannotBePlacedException(this.id());
+        }
+
         this.changeStatus(OrderStatus.PLACED);
+        this.setPlacedAt(OffsetDateTime.now());
+
     }
 
     public void changePaymentMethod(PaymentMethod paymentMethod) {
