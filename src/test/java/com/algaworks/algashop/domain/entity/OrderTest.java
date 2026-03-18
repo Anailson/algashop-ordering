@@ -22,15 +22,14 @@ class OrderTest {
 
     @Test
     public void shouldAddItem() {
-        Order order = Order.draft(new CustomerId());
-        ProductId productId = new ProductId();
 
-        order.addItem(
-                productId,
-                new ProductName("Mouse pad"),
-                new Money("100"),
-                new Quantity(1)
-        );
+        Order order = Order.draft(new CustomerId());
+        Product product = ProductTestDataBuilder.aProductAltMousePad().build();
+        ProductId productId = product.id();
+
+        order.addItem(product, new Quantity(1));
+
+        Assertions.assertThat(order.items().size()).isEqualTo(1);
 
         Assertions.assertThat(order.items().size()).isEqualTo(1);
 
@@ -47,15 +46,12 @@ class OrderTest {
 
     @Test
     public void shouldGenerateExceptionWhenTryToChangeItemSet() {
-        Order order = Order.draft(new CustomerId());
-        ProductId productId = new ProductId();
 
-        order.addItem(
-                productId,
-                new ProductName("Mouse pad"),
-                new Money("100"),
-                new Quantity(1)
-        );
+        Order order = Order.draft(new CustomerId());
+        Product product = ProductTestDataBuilder.aProductAltMousePad().build();
+
+        order.addItem(product, new Quantity(1));
+
 
         Set<OrderItem> items = order.items();
 
@@ -65,20 +61,16 @@ class OrderTest {
 
     @Test
     public void shouldCalculateTotals() {
+
         Order order = Order.draft(new CustomerId());
-        ProductId productId = new ProductId();
 
         order.addItem(
-                productId,
-                new ProductName("Mouse pad"),
-                new Money("100"),
+                ProductTestDataBuilder.aProductAltMousePad().build(),
                 new Quantity(2)
         );
 
         order.addItem(
-                productId,
-                new ProductName("RAM Memory"),
-                new Money("50"),
+                ProductTestDataBuilder.aProductAltRamMemory().build(),
                 new Quantity(1)
         );
 
@@ -208,14 +200,14 @@ class OrderTest {
 
     @Test
     public void givenDraftOrder_whenChangeItem_shouldRecalculate() {
+
         Order order = Order.draft(new CustomerId());
 
         order.addItem(
-                new ProductId(),
-                new ProductName("Destkop X11"),
-                new Money("10.00"),
+                ProductTestDataBuilder.aProductAltMousePad().build(),
                 new Quantity(3)
         );
+
 
         OrderItem orderItem = order.items().iterator().next();
 
