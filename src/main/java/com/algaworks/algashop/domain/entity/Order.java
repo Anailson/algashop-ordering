@@ -1,9 +1,6 @@
 package com.algaworks.algashop.domain.entity;
 
-import com.algaworks.algashop.domain.exception.OrderCannotBePlacedException;
-import com.algaworks.algashop.domain.exception.OrderDoesNotContainOrderItemException;
-import com.algaworks.algashop.domain.exception.OrderInvalidShippingDeliveryDateException;
-import com.algaworks.algashop.domain.exception.OrderStatusCannotBeChangedException;
+import com.algaworks.algashop.domain.exception.*;
 import com.algaworks.algashop.domain.valueobject.*;
 import com.algaworks.algashop.domain.valueobject.id.CustomerId;
 import com.algaworks.algashop.domain.valueobject.id.OrderId;
@@ -83,6 +80,8 @@ public class Order {
     //Contrato - CQRS (Command Query Responsibility Segregation)
     public void addItem(Product product, Quantity quantity) {
 
+        verifyIfChangeable();
+
         Objects.requireNonNull(product);
         Objects.requireNonNull(quantity);
 
@@ -116,17 +115,21 @@ public class Order {
     }
 
     public void changePaymentMethod(PaymentMethod paymentMethod) {
+        verifyIfChangeable();
         Objects.requireNonNull(paymentMethod);
         this.setPaymentMethod(paymentMethod);
     }
 
     //alterar informações do pagador
     public void changeBilling(Billing billing) {
+        verifyIfChangeable();
         Objects.requireNonNull(billing);
         this.setBilling(billing);
     }
 
     public void changeShipping(Shipping NewShipping) {
+        verifyIfChangeable();
+
         Objects.requireNonNull(NewShipping);
         //validação data de entrega
         if (NewShipping.expectedDate().isBefore(LocalDate.now())) {
@@ -138,6 +141,8 @@ public class Order {
 
     public void changeItemQuantity(OrderItemId orderItemId, Quantity quantity) {
 
+        verifyIfChangeable();
+
         Objects.requireNonNull(orderItemId);
         Objects.requireNonNull(quantity);
 
@@ -147,6 +152,7 @@ public class Order {
         this.recalculateTotals();
 
     }
+
 
     public boolean isDraft() {
         return OrderStatus.DRAFT.equals(this.status());
@@ -265,6 +271,13 @@ public class Order {
                 .findFirst()
                 .orElseThrow(() -> new OrderDoesNotContainOrderItemException(this.id(), orderItemId));
     }
+
+    private void verifyIfChangeable(){
+        if(!this.isDraft()){
+            throw new OrderCannotBeEditeException(this.id(),this.status());
+        }
+    }
+
 
     private void setId(OrderId id) {
         Objects.requireNonNull(id);
