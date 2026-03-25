@@ -110,8 +110,25 @@ public class Order {
     }
 
     public void markAsPaid() {
-        this.setPaidAt(OffsetDateTime.now());
         this.changeStatus(OrderStatus.PAID);
+        this.setPaidAt(OffsetDateTime.now());
+    }
+
+    /**
+     * O pedido só pode ser marcado como READY se estiver atualmente no status PAID.
+     * A cadeia de transições permitida é: DRAFT -> PLACED -> PAID -> READY.
+     * A transição de status deve ser validada utilizando as regras encapsuladas no enum OrderStatus.
+     * Caso a transição não seja válida, uma exceção de domínio apropriada deve ser lançada.
+     * O instante em que o pedido foi marcado como READY deve ser registrado na propriedade readyAt, usando OffsetDateTime.now().
+     * @param
+     */
+    public void markAsReady() {
+
+        // Valida se a transição é permitida e altera o status
+        this.changeStatus(OrderStatus.READY);
+
+        // Registra o momento em que ficou pronto
+        this.setReadyAt(OffsetDateTime.now());
     }
 
     public void changePaymentMethod(PaymentMethod paymentMethod) {
@@ -153,6 +170,20 @@ public class Order {
 
     }
 
+    //remove
+    public void removeItem(OrderItemId orderItemId){
+
+        //Validação do argumento
+        Objects.requireNonNull(orderItemId);
+        verifyIfChangeable();
+
+        //Busca do item
+        OrderItem orderItem = findOrderItem(orderItemId);
+        this.items.remove(orderItem);
+
+        //Atualização dos totais:
+        recalculateTotals();
+    }
 
     public boolean isDraft() {
         return OrderStatus.DRAFT.equals(this.status());
