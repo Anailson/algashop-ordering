@@ -120,6 +120,7 @@ public class Order {
      * A transição de status deve ser validada utilizando as regras encapsuladas no enum OrderStatus.
      * Caso a transição não seja válida, uma exceção de domínio apropriada deve ser lançada.
      * O instante em que o pedido foi marcado como READY deve ser registrado na propriedade readyAt, usando OffsetDateTime.now().
+     *
      * @param
      */
     public void markAsReady() {
@@ -171,7 +172,7 @@ public class Order {
     }
 
     //remove
-    public void removeItem(OrderItemId orderItemId){
+    public void removeItem(OrderItemId orderItemId) {
 
         //Validação do argumento
         Objects.requireNonNull(orderItemId);
@@ -185,6 +186,12 @@ public class Order {
         recalculateTotals();
     }
 
+    public void cancel() {
+        this.setCanceledAt(OffsetDateTime.now());
+        this.changeStatus(OrderStatus.CANCELED);
+    }
+
+
     public boolean isDraft() {
         return OrderStatus.DRAFT.equals(this.status());
     }
@@ -195,6 +202,14 @@ public class Order {
 
     public boolean isPaid() {
         return OrderStatus.PAID.equals(this.status());
+    }
+
+    public boolean isReady() {
+        return OrderStatus.READY.equals(this.status());
+    }
+
+    public boolean isCanceled() {
+        return OrderStatus.CANCELED.equals(this.status());
     }
 
     public OrderId id() {
@@ -303,9 +318,9 @@ public class Order {
                 .orElseThrow(() -> new OrderDoesNotContainOrderItemException(this.id(), orderItemId));
     }
 
-    private void verifyIfChangeable(){
-        if(!this.isDraft()){
-            throw new OrderCannotBeEditeException(this.id(),this.status());
+    private void verifyIfChangeable() {
+        if (!this.isDraft()) {
+            throw new OrderCannotBeEditeException(this.id(), this.status());
         }
     }
 
