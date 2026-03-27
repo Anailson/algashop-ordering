@@ -1,0 +1,10 @@
+package com.algaworks.algashop.domain.model.repository;
+
+import com.algaworks.algashop.domain.model.entity.AggregateRoot;
+
+public interface RemoveCapableRepository<T extends AggregateRoot<ID>, ID> extends Repository<T, ID> {
+
+    void remove(T t);
+
+    void remove(ID id);
+}
