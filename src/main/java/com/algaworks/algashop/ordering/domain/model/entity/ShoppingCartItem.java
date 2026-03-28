@@ -60,7 +60,7 @@ public class ShoppingCartItem {
         this.recalculateTotals();
     }
 
-    void changeQuantity(Quantity quantity) {
+    public void changeQuantity(Quantity quantity) {
         this.setQuantity(quantity);
         this.recalculateTotals();
     }

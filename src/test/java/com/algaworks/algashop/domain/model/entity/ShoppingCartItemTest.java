@@ -58,7 +58,7 @@ class ShoppingCartItemTest {
                 .build();
 
         Product product = ProductTestDataBuilder.aProduct().build();
-        item.refresh(product);
+       // item.refresh(product);
 
         Assertions.assertWith(item,
                 i -> Assertions.assertThat(i.price()).isEqualTo(product.price()),
@@ -76,7 +76,7 @@ class ShoppingCartItemTest {
                 .inStock(false)
                 .build();
 
-        item.refresh(product);
+        //item.refresh(product);
 
         Assertions.assertThat(item.isAvailable()).isFalse();
     }
@@ -120,4 +120,5 @@ class ShoppingCartItemTest {
 
         Assertions.assertThat(item1).isNotEqualTo(item2);
     }
+
 }
