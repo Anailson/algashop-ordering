@@ -1,14 +1,15 @@
 package com.algaworks.algashop.domain.model.factory;
 
-import com.algaworks.algashop.domain.model.entity.Order;
+import com.algaworks.algashop.ordering.domain.model.entity.Order;
 import com.algaworks.algashop.domain.model.entity.OrderTestDataBuilder;
-import com.algaworks.algashop.domain.model.entity.PaymentMethod;
+import com.algaworks.algashop.ordering.domain.model.entity.PaymentMethod;
 import com.algaworks.algashop.domain.model.entity.ProductTestDataBuilder;
-import com.algaworks.algashop.domain.model.valueobject.Billing;
-import com.algaworks.algashop.domain.model.valueobject.Product;
-import com.algaworks.algashop.domain.model.valueobject.Quantity;
-import com.algaworks.algashop.domain.model.valueobject.Shipping;
-import com.algaworks.algashop.domain.model.valueobject.id.CustomerId;
+import com.algaworks.algashop.ordering.domain.model.factory.OrderFactory;
+import com.algaworks.algashop.ordering.domain.model.valueobject.Billing;
+import com.algaworks.algashop.ordering.domain.model.valueobject.Product;
+import com.algaworks.algashop.ordering.domain.model.valueobject.Quantity;
+import com.algaworks.algashop.ordering.domain.model.valueobject.Shipping;
+import com.algaworks.algashop.ordering.domain.model.valueobject.id.CustomerId;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 

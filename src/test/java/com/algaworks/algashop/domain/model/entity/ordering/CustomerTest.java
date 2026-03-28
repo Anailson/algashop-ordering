@@ -1,8 +1,8 @@
 package com.algaworks.algashop.domain.model.entity.ordering;
 
-import com.algaworks.algashop.domain.model.entity.Customer;
-import com.algaworks.algashop.domain.model.exception.CustomerArchivedException;
-import com.algaworks.algashop.domain.model.valueobject.*;
+import com.algaworks.algashop.ordering.domain.model.entity.Customer;
+import com.algaworks.algashop.ordering.domain.model.exception.CustomerArchivedException;
+import com.algaworks.algashop.ordering.domain.model.valueobject.*;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
