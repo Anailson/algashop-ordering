@@ -27,12 +27,15 @@ public class Customer  implements AggregateRoot<CustomerId>{
     private LoyaltyPoints loyaltyPoints;
     private Address address;
 
+    private Long version;
+
     //criando novo cliente
     @Builder(builderClassName = "BrandNewCostumerBuild", builderMethodName = "brandNew")
     private static Customer createBrandNew(FullName fullName, BirthDate birthDate, Email email,
                                            Phone phone, Document document, Boolean promotionNotificationsAllowed,
                                            Address address) {
         return new Customer(new CustomerId(),
+                null,
                 fullName,
                 birthDate,
                 email,
@@ -48,10 +51,11 @@ public class Customer  implements AggregateRoot<CustomerId>{
 
     //criar cliente existente
     @Builder(builderClassName = "ExistingCustomerBuild", builderMethodName = "existing")
-    public Customer(CustomerId id, FullName fullName, BirthDate birthDate, Email email, Phone phone,
+    public Customer(CustomerId id, Long version, FullName fullName, BirthDate birthDate, Email email, Phone phone,
                     Document document, Boolean promotionNotificationsAllowed, Boolean archived,
                     OffsetDateTime registeredAt, OffsetDateTime archivedAt, LoyaltyPoints loyaltyPoints, Address address) {
         this.setId(id);
+        this.setVersion(version);
         this.setFullName(fullName);
         this.setBirthDate(birthDate);
         this.setEmail(email);
@@ -172,6 +176,14 @@ public class Customer  implements AggregateRoot<CustomerId>{
     }
     public Address getAddress() {
         return address;
+    }
+
+    public Long version() {
+        return version;
+    }
+
+    private void setVersion(Long version) {
+        this.version = version;
     }
 
     private void setId(CustomerId id) {
