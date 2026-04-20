@@ -43,7 +43,7 @@ public class ShoppingCartPersistenceEntityRepositoryIT {
         }
     }
 
-    @Test
+   @Test
     public void shouldPersist() {
         ShoppingCartPersistenceEntity entity = ShoppingCartPersistenceEntityTestDataBuilder.existingShoppingCart()
                 .customer(customerPersistenceEntity)
