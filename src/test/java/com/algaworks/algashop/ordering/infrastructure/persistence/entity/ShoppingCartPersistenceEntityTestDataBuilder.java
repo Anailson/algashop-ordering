@@ -1,6 +1,10 @@
 package com.algaworks.algashop.ordering.infrastructure.persistence.entity;
 
 import com.algaworks.algashop.ordering.domain.model.utility.IdGenerator;
+import com.algaworks.algashop.ordering.infrastructure.persistence.repository.ShoppingCartPersistenceEntityRepository;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -11,17 +15,13 @@ public class ShoppingCartPersistenceEntityTestDataBuilder {
     private ShoppingCartPersistenceEntityTestDataBuilder() {
     }
 
-    public static ShoppingCartPersistenceEntityBuilder existingShoppingCart() {
+    public static ShoppingCartPersistenceEntity.ShoppingCartPersistenceEntityBuilder existingShoppingCart() {
         return ShoppingCartPersistenceEntity.builder()
                 .id(IdGenerator.generateTimeBasedUUID())
                 .customer(CustomerPersistenceEntityTestDataBuilder.aCustomer().build())
                 .totalItems(3)
-                .totalAmount(new BigDecimal(1250))
-                .createdAt(OffsetDateTime.now())
-                .items(Set.of(
-                        existingItem().build(),
-                        existingItemAlt().build()
-                ));
+                .totalAmount(new BigDecimal("1250.00"))
+                .createdAt(OffsetDateTime.now());
     }
 
     public static ShoppingCartItemPersistenceEntity.ShoppingCartItemPersistenceEntityBuilder existingItem() {

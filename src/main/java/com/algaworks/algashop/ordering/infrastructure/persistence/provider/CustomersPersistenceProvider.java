@@ -87,6 +87,6 @@ public class CustomersPersistenceProvider implements Customers {
 
     @Override
     public boolean isEmailUnique(Email email, CustomerId exceptCustomerId) {
-       return persistenceRepository.existByEmailAndIdNot(email.value(), exceptCustomerId.value());
+       return persistenceRepository.existsByEmailAndIdNot(email.value(), exceptCustomerId.value());
     }
 }
