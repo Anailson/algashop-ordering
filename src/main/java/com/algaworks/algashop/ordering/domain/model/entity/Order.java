@@ -86,10 +86,10 @@ public class Order implements AggregateRoot<OrderId>{
     //Contrato - CQRS (Command Query Responsibility Segregation)
     public void addItem(Product product, Quantity quantity) {
 
-        verifyIfChangeable();
-
         Objects.requireNonNull(product);
         Objects.requireNonNull(quantity);
+
+        verifyIfChangeable();
 
         product.checkOutOfStock();
 
