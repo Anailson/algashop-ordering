@@ -1,11 +1,13 @@
 package com.algaworks.algashop.ordering.domain.model.service;
 
-import com.algaworks.algashop.domain.model.entity.OrderTestDataBuilder;
-import com.algaworks.algashop.domain.model.entity.ProductTestDataBuilder;
-import com.algaworks.algashop.ordering.domain.model.entity.Order;
-import com.algaworks.algashop.ordering.domain.model.entity.PaymentMethod;
-import com.algaworks.algashop.ordering.domain.model.valueobject.*;
-import com.algaworks.algashop.ordering.domain.model.valueobject.id.CustomerId;
+import com.algaworks.algashop.domain.model.order.OrderTestDataBuilder;
+import com.algaworks.algashop.domain.model.product.ProductTestDataBuilder;
+import com.algaworks.algashop.ordering.domain.model.commons.Money;
+import com.algaworks.algashop.ordering.domain.model.commons.Quantity;
+import com.algaworks.algashop.ordering.domain.model.order.*;
+import com.algaworks.algashop.ordering.domain.model.product.Product;
+import com.algaworks.algashop.ordering.domain.model.customer.CustomerId;
+import com.algaworks.algashop.ordering.domain.model.product.ProductOutOfStockException;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -53,7 +55,7 @@ public class BuyNowServiceTest {
         Quantity quantity = new Quantity(1);
         PaymentMethod paymentMethod = PaymentMethod.CREDIT_CARD;
 
-        assertThatExceptionOfType(com.algaworks.algashop.ordering.domain.model.exception.ProductOutOfStockException.class)
+        assertThatExceptionOfType(ProductOutOfStockException.class)
                 .isThrownBy(() -> buyNowService.buyNow(product, customerId, billingInfo, shippingInfo, quantity, paymentMethod));
     }
 

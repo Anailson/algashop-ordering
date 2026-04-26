@@ -1,13 +1,14 @@
 package com.algaworks.algashop.ordering.domain.model.service;
 
-import com.algaworks.algashop.domain.model.entity.OrderTestDataBuilder;
-import com.algaworks.algashop.domain.model.entity.ProductTestDataBuilder;
-import com.algaworks.algashop.domain.model.entity.ShoppingCartTestDataBuilder;
-import com.algaworks.algashop.ordering.domain.model.entity.Order;
-import com.algaworks.algashop.ordering.domain.model.entity.PaymentMethod;
-import com.algaworks.algashop.ordering.domain.model.entity.ShoppingCart;
-import com.algaworks.algashop.ordering.domain.model.exception.ShoppingCartCantProceedToCheckoutException;
-import com.algaworks.algashop.ordering.domain.model.valueobject.*;
+import com.algaworks.algashop.domain.model.order.OrderTestDataBuilder;
+import com.algaworks.algashop.domain.model.product.ProductTestDataBuilder;
+import com.algaworks.algashop.domain.model.shoppingcart.ShoppingCartTestDataBuilder;
+import com.algaworks.algashop.ordering.domain.model.commons.Money;
+import com.algaworks.algashop.ordering.domain.model.commons.Quantity;
+import com.algaworks.algashop.ordering.domain.model.order.*;
+import com.algaworks.algashop.ordering.domain.model.shoppingcart.ShoppingCart;
+import com.algaworks.algashop.ordering.domain.model.shoppingcart.ShoppingCartCantProceedToCheckoutException;
+import com.algaworks.algashop.ordering.domain.model.product.Product;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
