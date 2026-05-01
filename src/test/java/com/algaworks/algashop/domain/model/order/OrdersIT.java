@@ -1,6 +1,5 @@
-package com.algaworks.algashop.ordering.domain.model.repository;
+package com.algaworks.algashop.domain.model.order;
 
-import com.algaworks.algashop.domain.model.order.OrderTestDataBuilder;
 import com.algaworks.algashop.domain.model.customer.CustomerTestDataBuilder;
 import com.algaworks.algashop.ordering.domain.model.customer.Customers;
 import com.algaworks.algashop.ordering.domain.model.order.Order;

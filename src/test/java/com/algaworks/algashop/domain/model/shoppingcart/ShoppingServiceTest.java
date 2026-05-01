@@ -1,6 +1,5 @@
-package com.algaworks.algashop.ordering.domain.model.service;
+package com.algaworks.algashop.domain.model.shoppingcart;
 
-import com.algaworks.algashop.domain.model.shoppingcart.ShoppingCartTestDataBuilder;
 import com.algaworks.algashop.domain.model.customer.CustomerTestDataBuilder;
 import com.algaworks.algashop.ordering.domain.model.commons.Money;
 import com.algaworks.algashop.ordering.domain.model.commons.Quantity;

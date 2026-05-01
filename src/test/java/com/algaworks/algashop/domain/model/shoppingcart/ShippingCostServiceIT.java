@@ -1,4 +1,4 @@
-package com.algaworks.algashop.ordering.domain.model.service;
+package com.algaworks.algashop.domain.model.shoppingcart;
 
 import com.algaworks.algashop.ordering.domain.model.commons.ZipCode;
 import com.algaworks.algashop.ordering.domain.model.order.shopping.OriginAddressService;
