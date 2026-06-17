@@ -1,5 +1,6 @@
 package com.algaworks.algashop.ordering.domain.model.customer;
 
+import com.algaworks.algashop.ordering.domain.model.AbstractEventSourceEntity;
 import com.algaworks.algashop.ordering.domain.model.AggregateRoot;
 import com.algaworks.algashop.ordering.domain.model.commons.*;
 
@@ -12,7 +13,10 @@ import java.util.UUID;
 import static com.algaworks.algashop.ordering.domain.model.ErrorMessages.*;
 
 
-public class Customer  implements AggregateRoot<CustomerId> {
+public class Customer
+        extends  AbstractEventSourceEntity
+        implements AggregateRoot<CustomerId> {
+
     private CustomerId id;
     private FullName fullName;
     private BirthDate birthDate;
@@ -33,7 +37,7 @@ public class Customer  implements AggregateRoot<CustomerId> {
     private static Customer createBrandNew(FullName fullName, BirthDate birthDate, Email email,
                                            Phone phone, Document document, Boolean promotionNotificationsAllowed,
                                            Address address) {
-        return new Customer(new CustomerId(),
+        Customer customer = new Customer(new CustomerId(),
                 null,
                 fullName,
                 birthDate,
@@ -46,6 +50,10 @@ public class Customer  implements AggregateRoot<CustomerId> {
                 null,
                 LoyaltyPoints.ZERO,
                 address);
+
+        customer.publishDomainEvent(new CustomerRegisteredEvent(customer.id(), customer.registeredAt()));
+
+        return customer;
     }
 
     //criar cliente existente
