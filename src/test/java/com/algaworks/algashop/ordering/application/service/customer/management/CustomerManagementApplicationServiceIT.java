@@ -137,4 +137,6 @@ class CustomerManagementApplicationServiceIT {
         Assertions.assertThatExceptionOfType(CustomerArchivedException.class)
                 .isThrownBy(() -> customerManagementApplicationService.archive(customerId));
     }
+
+
 }
