@@ -102,6 +102,8 @@ public class Customer
                 .number("Anonymous")
                 .complement(null).build());
 
+        this.publishDomainEvent(new CustomerArchivedEvent(this.id(), this.archivedAt()));
+
     }
 
 

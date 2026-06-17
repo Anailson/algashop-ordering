@@ -1,10 +1,7 @@
 package com.algaworks.algashop.domain.model.customer;
 
 import com.algaworks.algashop.ordering.domain.model.commons.*;
-import com.algaworks.algashop.ordering.domain.model.customer.CustomerRegisteredEvent;
-import com.algaworks.algashop.ordering.domain.model.customer.LoyaltyPoints;
-import com.algaworks.algashop.ordering.domain.model.customer.Customer;
-import com.algaworks.algashop.ordering.domain.model.customer.CustomerArchivedException;
+import com.algaworks.algashop.ordering.domain.model.customer.*;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -102,6 +99,14 @@ class CustomerTest {
     void givenValidData_whenCreateBrandNewCustomer_shouldGenerateCustomerRegisteredEvent() {
         Customer customer = CustomerTestDataBuilder.brandNewCustomer().build();
         CustomerRegisteredEvent event = new CustomerRegisteredEvent(customer.id(), customer.registeredAt());
+        Assertions.assertThat(customer.domainEvents()).contains(event);
+    }
+
+    @Test
+    void givenUnarchivedCustomer_whenArchive_shouldGenerateCustomerArchivedEvent() {
+        Customer customer = CustomerTestDataBuilder.existingCustomer().archived(false).archivedAt(null).build();
+        customer.archive();
+        CustomerArchivedEvent event = new CustomerArchivedEvent(customer.id(), customer.archivedAt());
         Assertions.assertThat(customer.domainEvents()).contains(event);
     }
 }
