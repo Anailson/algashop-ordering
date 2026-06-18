@@ -1,142 +1,146 @@
 package com.algaworks.algashop.ordering.application.service.customer.management;
 
-import com.algaworks.algashop.ordering.application.customer.management.CustomerManagementApplicationService;
-import com.algaworks.algashop.ordering.application.commons.AddressData;
-import com.algaworks.algashop.ordering.application.customer.management.CustomerInput;
-import com.algaworks.algashop.ordering.application.customer.management.CustomerOutput;
-import com.algaworks.algashop.ordering.application.customer.management.CustomerUpdateInput;
-import com.algaworks.algashop.ordering.domain.model.customer.CustomerArchivedException;
-import com.algaworks.algashop.ordering.domain.model.customer.CustomerNotFoundException;
+import com.algaworks.algashop.domain.model.customer.CustomerTestDataBuilder;
+import com.algaworks.algashop.domain.model.order.OrderTestDataBuilder;
+import com.algaworks.algashop.ordering.application.order.management.OrderManagementApplicationService;
+import com.algaworks.algashop.ordering.domain.model.customer.Customers;
+import com.algaworks.algashop.ordering.domain.model.order.*;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.util.UUID;
+
+import java.util.Optional;
 
 @SpringBootTest
 @Transactional
 class CustomerManagementApplicationServiceIT {
 
+    @Autowired
+    private OrderManagementApplicationService service;
 
     @Autowired
-    private CustomerManagementApplicationService customerManagementApplicationService;
+    private Orders orders;
 
-    @Test
-    public void shouldRegister() {
-        CustomerInput input = CustomerInputTestDataBuilder.aCustomer().build();
+    @Autowired
+    private Customers customers;
 
-        UUID customerId = customerManagementApplicationService.create(input);
-        Assertions.assertThat(customerId).isNotNull();
-
-        CustomerOutput customerOutput = customerManagementApplicationService.findById(customerId);
-
-        Assertions.assertThat(customerOutput)
-                .extracting(
-                        CustomerOutput::getId,
-                        CustomerOutput::getFirstName,
-                        CustomerOutput::getLastName,
-                        CustomerOutput::getEmail,
-                        CustomerOutput::getBirthDate
-                ).containsExactly(
-                        customerId,
-                        "John",
-                        "Doe",
-                        "johndoe@email.com",
-                        LocalDate.of(1991, 7,5)
-                );
-
-        Assertions.assertThat(customerOutput.getRegisteredAt()).isNotNull();
+    @BeforeEach
+    public void setup() {
+        if (!customers.exists(CustomerTestDataBuilder.DEFAULT_CUSTOMER_ID)) {
+            customers.add(CustomerTestDataBuilder.existingCustomer().build());
+        }
     }
 
     @Test
-    public void shouldUpdate() {
-        CustomerInput input = CustomerInputTestDataBuilder.aCustomer().build();
-        CustomerUpdateInput updateInput = CustomerUpdateInputTestDataBuilder.aCustomerUpdate().build();
+    void shouldCancelOrderSuccessfully() {
+        Order order = OrderTestDataBuilder.anOrder().status(OrderStatus.PLACED).build();
+        orders.add(order);
 
-        UUID customerId = customerManagementApplicationService.create(input);
-        Assertions.assertThat(customerId).isNotNull();
+        service.cancel(order.id().toString());
 
-        customerManagementApplicationService.update(customerId, updateInput);
-
-        CustomerOutput customerOutput = customerManagementApplicationService.findById(customerId);
-
-        Assertions.assertThat(customerOutput)
-                .extracting(
-                        CustomerOutput::getId,
-                        CustomerOutput::getFirstName,
-                        CustomerOutput::getLastName,
-                        CustomerOutput::getEmail,
-                        CustomerOutput::getBirthDate
-                ).containsExactly(
-                        customerId,
-                        "Matt",
-                        "Damon",
-                        "johndoe@email.com",
-                        LocalDate.of(1991, 7,5)
-                );
-
-        Assertions.assertThat(customerOutput.getRegisteredAt()).isNotNull();
+        Optional<Order> updatedOrder = orders.ofId(order.id());
+        Assertions.assertThat(updatedOrder).isPresent();
+        Assertions.assertThat(updatedOrder.get().status()).isEqualTo(OrderStatus.CANCELED);
+        Assertions.assertThat(updatedOrder.get().canceledAt()).isNotNull();
     }
 
     @Test
-    public void shouldArchiveCustomer() {
-        CustomerInput input = CustomerInputTestDataBuilder.aCustomer().build();
-        UUID customerId = customerManagementApplicationService.create(input);
-        Assertions.assertThat(customerId).isNotNull();
+    void shouldThrowOrderNotFoundExceptionWhenCancellingNonExistingOrder() {
+        String nonExistingOrderId = new OrderId().toString();
 
-        customerManagementApplicationService.archive(customerId);
-
-        CustomerOutput archivedCustomer = customerManagementApplicationService.findById(customerId);
-
-        Assertions.assertThat(archivedCustomer)
-                .isNotNull()
-                .extracting(
-                        CustomerOutput::getFirstName,
-                        CustomerOutput::getLastName,
-                        CustomerOutput::getPhone,
-                        CustomerOutput::getDocument,
-                        CustomerOutput::getBirthDate,
-                        CustomerOutput::getPromotionNotificationsAllowed
-                ).containsExactly(
-                        "Anonymous",
-                        "Anonymous",
-                        "000-000-0000",
-                        "000-00-0000",
-                        null,
-                        false
-                );
-
-        Assertions.assertThat(archivedCustomer.getEmail()).endsWith("@anonymous.com");
-        Assertions.assertThat(archivedCustomer.getArchived()).isTrue();
-        Assertions.assertThat(archivedCustomer.getArchivedAt()).isNotNull();
-
-        Assertions.assertThat(archivedCustomer.getAddress()).isNotNull();
-        Assertions.assertThat(archivedCustomer.getAddress().getNumber()).isNotNull().isEqualTo("Anonymized");
-        Assertions.assertThat(archivedCustomer.getAddress().getComplement()).isNull();
+        Assertions.assertThatExceptionOfType(OrderNotFoundException.class)
+                .isThrownBy(() -> service.cancel(nonExistingOrderId));
     }
 
     @Test
-    public void shouldThrowCustomerNotFoundExceptionWhenArchivingNonExistingCustomer() {
-        UUID nonExistingId = UUID.randomUUID();
+    void shouldThrowOrderStatusCannotBeChangedExceptionWhenCancellingAlreadyCanceledOrder() {
+        Order order = OrderTestDataBuilder.anOrder().status(OrderStatus.CANCELED).build();
+        orders.add(order);
 
-        Assertions.assertThatExceptionOfType(CustomerNotFoundException.class)
-                .isThrownBy(() -> customerManagementApplicationService.archive(nonExistingId));
+        Assertions.assertThatExceptionOfType(OrderStatusCannotBeChangedException.class)
+                .isThrownBy(() -> service.cancel(order.id().toString()));
     }
 
     @Test
-    public void shouldThrowCustomerArchivedExceptionWhenArchivingAlreadyArchivedCustomer() {
-        CustomerInput input = CustomerInputTestDataBuilder.aCustomer().build();
-        UUID customerId = customerManagementApplicationService.create(input);
-        Assertions.assertThat(customerId).isNotNull();
+    void shouldMarkOrderAsPaidSuccessfully() {
+        Order order = OrderTestDataBuilder.anOrder().status(OrderStatus.PLACED).build();
+        orders.add(order);
 
-        customerManagementApplicationService.archive(customerId);
+        service.markAsPaid(order.id().toString());
 
-        Assertions.assertThatExceptionOfType(CustomerArchivedException.class)
-                .isThrownBy(() -> customerManagementApplicationService.archive(customerId));
+        Optional<Order> updatedOrder = orders.ofId(order.id());
+        Assertions.assertThat(updatedOrder).isPresent();
+        Assertions.assertThat(updatedOrder.get().status()).isEqualTo(OrderStatus.PAID);
+        Assertions.assertThat(updatedOrder.get().paidAt()).isNotNull();
     }
 
+    @Test
+    void shouldThrowOrderNotFoundExceptionWhenMarkingNonExistingOrderAsPaid() {
+        String nonExistingOrderId = new OrderId().toString();
+
+        Assertions.assertThatExceptionOfType(OrderNotFoundException.class)
+                .isThrownBy(() -> service.markAsPaid(nonExistingOrderId));
+    }
+
+    @Test
+    void shouldThrowOrderStatusCannotBeChangedExceptionWhenMarkingAlreadyPaidOrderAsPaid() {
+        Order order = OrderTestDataBuilder.anOrder().status(OrderStatus.PAID).build();
+        orders.add(order);
+
+        Assertions.assertThatExceptionOfType(OrderStatusCannotBeChangedException.class)
+                .isThrownBy(() -> service.markAsPaid(order.id().toString()));
+    }
+
+    @Test
+    void shouldThrowOrderStatusCannotBeChangedExceptionWhenMarkingCanceledOrderAsPaid() {
+        Order order = OrderTestDataBuilder.anOrder().status(OrderStatus.CANCELED).build();
+        orders.add(order);
+
+        Assertions.assertThatExceptionOfType(OrderStatusCannotBeChangedException.class)
+                .isThrownBy(() -> service.markAsPaid(order.id().toString()));
+    }
+
+    @Test
+    void shouldMarkOrderAsReadySuccessfully() {
+        Order order = OrderTestDataBuilder.anOrder().status(OrderStatus.PAID).build();
+        orders.add(order);
+
+        service.markAsReady(order.id().toString());
+
+        Optional<Order> updatedOrder = orders.ofId(order.id());
+        Assertions.assertThat(updatedOrder).isPresent();
+        Assertions.assertThat(updatedOrder.get().status()).isEqualTo(OrderStatus.READY);
+        Assertions.assertThat(updatedOrder.get().readyAt()).isNotNull();
+    }
+
+    @Test
+    void shouldThrowOrderNotFoundExceptionWhenMarkingNonExistingOrderAsReady() {
+        String nonExistingOrderId = new OrderId().toString();
+
+        Assertions.assertThatExceptionOfType(OrderNotFoundException.class)
+                .isThrownBy(() -> service.markAsReady(nonExistingOrderId));
+    }
+
+    @Test
+    void shouldThrowOrderStatusCannotBeChangedExceptionWhenMarkingAlreadyReadyOrderAsReady() {
+        Order order = OrderTestDataBuilder.anOrder().status(OrderStatus.READY).build();
+        orders.add(order);
+
+        Assertions.assertThatExceptionOfType(OrderStatusCannotBeChangedException.class)
+                .isThrownBy(() -> service.markAsReady(order.id().toString()));
+    }
+
+    @Test
+    void shouldThrowOrderStatusCannotBeChangedExceptionWhenMarkingPlacedOrderAsReady() {
+        Order order = OrderTestDataBuilder.anOrder().status(OrderStatus.PLACED).build();
+        orders.add(order);
+
+        Assertions.assertThatExceptionOfType(OrderStatusCannotBeChangedException.class)
+                .isThrownBy(() -> service.markAsReady(order.id().toString()));
+    }
 
 }
