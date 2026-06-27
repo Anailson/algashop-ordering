@@ -3,6 +3,8 @@ package com.algaworks.algashop.ordering.application.checkout;
 import com.algaworks.algashop.domain.model.customer.CustomerTestDataBuilder;
 import com.algaworks.algashop.domain.model.product.ProductTestDataBuilder;
 import com.algaworks.algashop.ordering.application.commons.AddressData;
+import com.algaworks.algashop.ordering.application.order.query.BillingData;
+import com.algaworks.algashop.ordering.application.order.query.RecipientData;
 
 public class BuyNowInputTestDataBuilder {
 
