@@ -60,7 +60,7 @@ class OrderQueryServiceIT {
         orders.add(OrderTestDataBuilder.anOrder().status(OrderStatus.READY).customerId(customer.id()).build());
         orders.add(OrderTestDataBuilder.anOrder().status(OrderStatus.CANCELED).customerId(customer.id()).build());
 
-        Page<OrderSummaryOutput> page = queryService.filter(new PageFilter(3, 0));
+        Page<OrderSummaryOutput> page = queryService.filter(new OrderFilter(3, 0));
 
         Assertions.assertThat(page.getTotalPages()).isEqualTo(2);
         Assertions.assertThat(page.getTotalElements()).isEqualTo(5);
