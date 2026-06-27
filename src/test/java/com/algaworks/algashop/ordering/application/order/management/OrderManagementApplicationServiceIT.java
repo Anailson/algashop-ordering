@@ -4,6 +4,7 @@ import com.algaworks.algashop.domain.model.customer.CustomerTestDataBuilder;
 import com.algaworks.algashop.domain.model.order.OrderTestDataBuilder;
 import com.algaworks.algashop.ordering.domain.model.customer.Customers;
 import com.algaworks.algashop.ordering.domain.model.order.*;
+import com.algaworks.algashop.ordering.infrastructure.listener.order.OrderEventListener;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import org.assertj.core.api.Assertions;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
@@ -26,6 +28,9 @@ class OrderManagementApplicationServiceIT {
 
     @Autowired
     private Customers customers;
+
+    @MockitoSpyBean
+    private OrderEventListener orderEventListener;
 
     @BeforeEach
     public void setup() {

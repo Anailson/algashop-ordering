@@ -42,7 +42,7 @@ public class Order
     private Long version;
 
     @Builder(builderClassName = "ExistingOrderBuilder", builderMethodName = "existing")
-    public Order(OrderId id,Long version, CustomerId customerId,
+    public Order(OrderId id, Long version, CustomerId customerId,
                  Money totalAmount, Quantity totalItems,
                  OffsetDateTime placedAt, OffsetDateTime paidAt,
                  OffsetDateTime canceledAt, OffsetDateTime readyAt,
@@ -65,7 +65,6 @@ public class Order
         this.setItems(items);
     }
 
-
     public static Order draft(CustomerId customerId) {
         return new Order(
                 new OrderId(),
@@ -85,13 +84,11 @@ public class Order
         );
     }
 
-    //Contrato - CQRS (Command Query Responsibility Segregation)
     public void addItem(Product product, Quantity quantity) {
-
         Objects.requireNonNull(product);
         Objects.requireNonNull(quantity);
 
-        verifyIfChangeable();
+        this.verifyIfChangeable();
 
         product.checkOutOfStock();
 
@@ -114,91 +111,72 @@ public class Order
         this.verifyIfCanChangeToPlaced();
         this.changeStatus(OrderStatus.PLACED);
         this.setPlacedAt(OffsetDateTime.now());
-
+        publishDomainEvent(new OrderPlacedEvent(this.id(), this.customerId(), this.placedAt()));
     }
 
     public void markAsPaid() {
         this.changeStatus(OrderStatus.PAID);
         this.setPaidAt(OffsetDateTime.now());
+        publishDomainEvent(new OrderPaidEvent(this.id(), this.customerId(), this.paidAt()));
     }
 
-    /**
-     * O pedido só pode ser marcado como READY se estiver atualmente no status PAID.
-     * A cadeia de transições permitida é: DRAFT -> PLACED -> PAID -> READY.
-     * A transição de status deve ser validada utilizando as regras encapsuladas no enum OrderStatus.
-     * Caso a transição não seja válida, uma exceção de domínio apropriada deve ser lançada.
-     * O instante em que o pedido foi marcado como READY deve ser registrado na propriedade readyAt, usando OffsetDateTime.now().
-     *
-     * @param
-     */
     public void markAsReady() {
-
-        // Valida se a transição é permitida e altera o status
         this.changeStatus(OrderStatus.READY);
-
-        // Registra o momento em que ficou pronto
         this.setReadyAt(OffsetDateTime.now());
-    }
-
-    public void changePaymentMethod(PaymentMethod paymentMethod) {
-        verifyIfChangeable();
-        Objects.requireNonNull(paymentMethod);
-        this.setPaymentMethod(paymentMethod);
-    }
-
-    //alterar informações do pagador
-    public void changeBilling(Billing billing) {
-        verifyIfChangeable();
-        Objects.requireNonNull(billing);
-        this.setBilling(billing);
-    }
-
-    public void changeShipping(Shipping NewShipping) {
-        verifyIfChangeable();
-
-        Objects.requireNonNull(NewShipping);
-        //validação data de entrega
-        if (NewShipping.expectedDate().isBefore(LocalDate.now())) {
-            throw new OrderInvalidShippingDeliveryDateException(this.id());
-        }
-
-        this.setShipping(shipping);
-    }
-
-    public void changeItemQuantity(OrderItemId orderItemId, Quantity quantity) {
-
-        verifyIfChangeable();
-
-        Objects.requireNonNull(orderItemId);
-        Objects.requireNonNull(quantity);
-
-        OrderItem orderItem = this.findOrderItem(orderItemId);
-        orderItem.changeQuantity(quantity);
-
-        this.recalculateTotals();
-
-    }
-
-    //remove
-    public void removeItem(OrderItemId orderItemId) {
-
-        //Validação do argumento
-        Objects.requireNonNull(orderItemId);
-        verifyIfChangeable();
-
-        //Busca do item
-        OrderItem orderItem = findOrderItem(orderItemId);
-        this.items.remove(orderItem);
-
-        //Atualização dos totais:
-        recalculateTotals();
+        publishDomainEvent(new OrderReadyEvent(this.id(), this.customerId(), this.readyAt()));
     }
 
     public void cancel() {
         this.setCanceledAt(OffsetDateTime.now());
         this.changeStatus(OrderStatus.CANCELED);
+        publishDomainEvent(new OrderCanceledEvent(this.id(), this.customerId(), this.canceledAt()));
     }
 
+    public void changePaymentMethod(PaymentMethod paymentMethod) {
+        Objects.requireNonNull(paymentMethod);
+        this.verifyIfChangeable();
+        this.setPaymentMethod(paymentMethod);
+    }
+
+    public void changeBilling(Billing billing) {
+        Objects.requireNonNull(billing);
+        this.verifyIfChangeable();
+        this.setBilling(billing);
+    }
+
+    public void changeShipping(Shipping newShipping) {
+        Objects.requireNonNull(newShipping);
+
+        this.verifyIfChangeable();
+
+        if (newShipping.expectedDate().isBefore(LocalDate.now())) {
+            throw new OrderInvalidShippingDeliveryDateException(this.id());
+        }
+
+        this.setShipping(newShipping);
+    }
+
+    public void changeItemQuantity(OrderItemId orderItemId, Quantity quantity) {
+        Objects.requireNonNull(orderItemId);
+        Objects.requireNonNull(quantity);
+
+        this.verifyIfChangeable();
+
+        OrderItem orderItem = this.findOrderItem(orderItemId);
+        orderItem.changeQuantity(quantity);
+
+        this.recalculateTotals();
+    }
+
+    public void removeItem(OrderItemId orderItemId) {
+        Objects.requireNonNull(orderItemId);
+        this.verifyIfChangeable();
+
+        OrderItem orderItem = findOrderItem(orderItemId);
+        this.items.remove(orderItem);
+
+        this.recalculateTotals();
+    }
 
     public boolean isDraft() {
         return OrderStatus.DRAFT.equals(this.status());
@@ -272,10 +250,7 @@ public class Order
         return Collections.unmodifiableSet(this.items);
     }
 
-
-
     private void recalculateTotals() {
-
         BigDecimal totalItemsAmount = this.items().stream().map(i -> i.totalAmount().value())
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
@@ -283,7 +258,7 @@ public class Order
                 .reduce(0, Integer::sum);
 
         BigDecimal shippingCost;
-        if (this.shipping() == null) {
+        if(this.shipping() == null) {
             shippingCost = BigDecimal.ZERO;
         } else {
             shippingCost = this.shipping().cost().value();
@@ -303,7 +278,6 @@ public class Order
         this.setStatus(newStatus);
     }
 
-
     private void verifyIfCanChangeToPlaced() {
         if (this.shipping() == null) {
             throw OrderCannotBePlacedException.noShippingInfo(this.id());
@@ -321,27 +295,25 @@ public class Order
 
     private OrderItem findOrderItem(OrderItemId orderItemId) {
         Objects.requireNonNull(orderItemId);
-        return this.items()
-                .stream()
+        return this.items().stream()
                 .filter(i -> i.id().equals(orderItemId))
                 .findFirst()
-                .orElseThrow(() -> new OrderDoesNotContainOrderItemException(this.id(), orderItemId));
+                .orElseThrow(()-> new OrderDoesNotContainOrderItemException(this.id(), orderItemId));
     }
 
     private void verifyIfChangeable() {
         if (!this.isDraft()) {
-            throw new OrderCannotBeEditeException(this.id(), this.status());
+            throw new OrderCannotBeEditedException(this.id(), this.status());
         }
     }
 
-    public Long version(){
+    public Long version() {
         return version;
     }
 
     private void setVersion(Long version) {
         this.version = version;
     }
-
 
     private void setId(OrderId id) {
         Objects.requireNonNull(id);
@@ -412,6 +384,5 @@ public class Order
     public int hashCode() {
         return Objects.hashCode(id);
     }
-
 
 }
